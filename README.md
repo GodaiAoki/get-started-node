@@ -1,3 +1,6 @@
+# get-stated-nodeをICOS上の画像を取得するように変更したサンプル
+Qiita: https://qiita.com/Godai_Aoki/items/c0447d5dc491cdd75b58
+
 # Node.js getting started application
 The Getting Started tutorial for Node.js uses this sample application to provide you with a sample workflow for working with any Node.js app on IBM Cloud or in IBM Cloud Private; you set up a development environment, deploy an app locally and on the cloud, and then integrate a IBM Cloud database service in your app.
 
