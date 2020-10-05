@@ -3,8 +3,30 @@ var app = express();
 var cfenv = require("cfenv");
 var bodyParser = require('body-parser')
 
+
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
+
+//ベーシック認証
+// const basicAuth = require('basic-auth-connect'); // 基本認証用
+
+//ICOS参照用の変更
+const AWS = require('ibm-cos-sdk');
+
+//apikeyIdとInstanceIdはダミー
+const config = {
+  endpoint: 's3.ap.cloud-object-storage.appdomain.cloud',
+  apiKeyId: 'oP581KVXr-6X4AWBWWm6ROQuv23QNbUKHxxxxxxxx',
+  region: "ap-geo",
+  serviceInstanceId: 'crn:v1:bluemix:public:cloud-object-storage:global:a/8181f93cf3b742dbd2ab762ed34a2319:4eac0af5-594d-464e-9fbxxxxxxxx::'
+};
+
+const bucketName = 'ga-test'
+
+var cos = new AWS.S3(config);
+
+
+
 
 // parse application/json
 app.use(bodyParser.json())
@@ -75,12 +97,44 @@ getAll.mongodb = function(response) {
   });
 }
 
+//ベーシック認証
+// app.all('/*', basicAuth(function(user, password) {
+//   //console.log("userCreds:"+ userCreds.users);
+//   return user==="test" && password==="test";
+// }));
+
+/*icosのイメージ参照*/
+app.get('/images/:imageFile', function(req, res){
+  console.log("filename = " + req.params.imageFile);
+      console.log(`Retrieving item from bucket: ` + bucketName +`, key:` + req.params.imageFile);
+      return cos.getObject({
+          Bucket: bucketName,
+          Key: req.params.imageFile
+      }).promise()
+      .then((data) => {
+          // console.log(data);
+          if (data != null) {
+
+              // console.log('File Contents: ' + Buffer.from(data.Body).toString());
+              res.status(200).send(data.Body);
+          }else{
+            res.status(404).send();
+          }
+      })
+      .catch((e) => {
+          console.log(`ERROR: ${e.code} - ${e.message}\n`);
+          res.status(404).send();
+      });
+
+});
+
 /* Endpoint to greet and add a new visitor to database.
 * Send a POST request to localhost:3000/api/visitors with body
 * {
 *   "name": "Bob"
 * }
 */
+
 app.post("/api/visitors", function (request, response) {
   var userName = request.body.name;
   var doc = { "name" : userName };
